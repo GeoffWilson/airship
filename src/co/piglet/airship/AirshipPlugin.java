@@ -137,5 +137,4 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
 
         return true;
     }
-
 }

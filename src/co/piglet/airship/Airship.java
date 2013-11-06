@@ -1,7 +1,5 @@
 package co.piglet.airship;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -9,13 +7,11 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Airship
 {
-
     public BukkitTask task;
     private ConcurrentLinkedQueue<AirshipBlock> blocks;
     private World world;
@@ -73,13 +69,11 @@ public class Airship
         neighbours[16] = block.getRelative(BlockFace.SOUTH_EAST);
         neighbours[17] = block.getRelative(BlockFace.SOUTH_WEST);
 
-        for (int i = 0; i < neighbours.length; i++)
-        {
-            AirshipBlock b = new AirshipBlock(neighbours[i]);
-            if (b.t != Material.AIR && !blocks.contains(b))
-            {
+        for (Block neighbour : neighbours) {
+            AirshipBlock b = new AirshipBlock(neighbour);
+            if (b.t != Material.AIR && !blocks.contains(b)) {
                 blocks.add(b);
-                scanAirship(neighbours[i]);
+                scanAirship(neighbour);
             }
         }
     }
@@ -98,13 +92,10 @@ public class Airship
             newBlock.setType(block.t);
             newBlock.setData(block.d);
         }
-
-
     }
 
     public void rotateAirship(TurnDirection turnDirection)
     {
-
         int maxX = blocks.peek().x;
         int maxZ = blocks.peek().z;
         int minX = maxX;
@@ -156,7 +147,6 @@ public class Airship
 
     private class AirshipBlock implements Comparable<AirshipBlock>
     {
-
         public int rotate90Reverse(Material type, int data)
         {
 
@@ -190,7 +180,6 @@ public class Airship
                         case 6:
                             return 9;
                     }
-            /* FALL-THROUGH */
 
                 case POWERED_RAIL:
                 case DETECTOR_RAIL:
@@ -199,7 +188,7 @@ public class Airship
                     switch (data & 0x7)
                     {
                         case 1:
-                            return 0 | power;
+                            return power;
                         case 0:
                             return 1 | power;
                         case 5:
@@ -266,7 +255,7 @@ public class Airship
                         case 0:
                             return 7 | thrown;
                         case 7:
-                            return 0 | thrown;
+                            return thrown;
                     }
                     break;
 
@@ -278,8 +267,6 @@ public class Airship
                         break;
                     }
 
-            /* FALL-THROUGH */
-
                 case COCOA:
                 case TRIPWIRE_HOOK:
                     int extra = data & ~0x3;
@@ -287,7 +274,7 @@ public class Airship
                     switch (withoutFlags)
                     {
                         case 1:
-                            return 0 | extra;
+                            return extra;
                         case 2:
                             return 1 | extra;
                         case 3:
@@ -366,7 +353,7 @@ public class Airship
                     switch (dir)
                     {
                         case 1:
-                            return 0 | delay;
+                            return delay;
                         case 2:
                             return 1 | delay;
                         case 3:
@@ -382,7 +369,7 @@ public class Airship
                     switch (orientation)
                     {
                         case 3:
-                            return 0 | withoutOrientation;
+                            return withoutOrientation;
                         case 2:
                             return 1 | withoutOrientation;
                         case 0:
@@ -475,7 +462,6 @@ public class Airship
                         case 9:
                             return 6;
                     }
-            /* FALL-THROUGH */
 
                 case POWERED_RAIL:
                 case DETECTOR_RAIL:
@@ -485,7 +471,7 @@ public class Airship
                         case 0:
                             return 1 | (data & ~0x7);
                         case 1:
-                            return 0 | (data & ~0x7);
+                            return (data & ~0x7);
                         case 2:
                             return 5 | (data & ~0x7);
                         case 3:
@@ -548,7 +534,7 @@ public class Airship
                         case 6:
                             return 5 | thrown;
                         case 7:
-                            return 0 | thrown;
+                            return thrown;
                         case 0:
                             return 7 | thrown;
                     }
@@ -561,8 +547,6 @@ public class Airship
                         // door top halves contain no orientation information
                         break;
                     }
-
-            /* FALL-THROUGH */
 
                 case COCOA:
                 case TRIPWIRE_HOOK:
@@ -577,7 +561,7 @@ public class Airship
                         case 2:
                             return 3 | extra;
                         case 3:
-                            return 0 | extra;
+                            return extra;
                     }
                     break;
 
@@ -657,7 +641,7 @@ public class Airship
                         case 2:
                             return 3 | delay;
                         case 3:
-                            return 0 | delay;
+                            return delay;
                     }
                     break;
 
@@ -671,7 +655,7 @@ public class Airship
                         case 1:
                             return 2 | withoutOrientation;
                         case 2:
-                            return 0 | withoutOrientation;
+                            return withoutOrientation;
                         case 3:
                             return 1 | withoutOrientation;
                     }
@@ -817,5 +801,4 @@ public class Airship
                 return 1;
         }
     }
-
 }
