@@ -1,5 +1,6 @@
 package co.piglet.airship;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -69,9 +70,11 @@ public class Airship
         neighbours[16] = block.getRelative(BlockFace.SOUTH_EAST);
         neighbours[17] = block.getRelative(BlockFace.SOUTH_WEST);
 
-        for (Block neighbour : neighbours) {
+        for (Block neighbour : neighbours)
+        {
             AirshipBlock b = new AirshipBlock(neighbour);
-            if (b.t != Material.AIR && !blocks.contains(b)) {
+            if (b.t != Material.AIR && !blocks.contains(b))
+            {
                 blocks.add(b);
                 scanAirship(neighbour);
             }
@@ -116,8 +119,17 @@ public class Airship
         int originX = (maxX + minX) / 2;
         int originZ = (maxZ + minZ) / 2;
 
+        Location playerLocation = owner.getLocation();
+        playerLocation.setY(playerLocation.getY() - 1);
+        boolean rotatePlayer = false;
+
         for (AirshipBlock block : blocks)
         {
+            Location blockLocation = new Location(world, block.x, block.y, block.z);
+            if (blockLocation.equals(playerLocation))
+            {
+                rotatePlayer = true;
+            }
             world.getBlockAt(block.x, block.y, block.z).setType(Material.AIR);
             block.rotateBlock(turnDirection, originX, originZ);
         }
@@ -143,6 +155,34 @@ public class Airship
                 currentDirection = turnDirection == TurnDirection.LEFT ? BlockFace.SOUTH : BlockFace.NORTH;
                 break;
         }
+        if (rotatePlayer)
+        {
+            rotatePlayer(turnDirection, originX, originZ, owner);
+        }
+    }
+
+    public void rotatePlayer(TurnDirection turnDirection, int originX, int originZ, Player player)
+    {
+
+        int x = (int) (player.getLocation().getX() - originX);
+        int z = (int) (player.getLocation().getZ() - originZ);
+        int x2;
+        int z2;
+
+        if (turnDirection == TurnDirection.RIGHT)
+        {
+            x2 = -z;
+            z2 = x;
+        }
+        else
+        {
+            x2 = z;
+            z2 = -x;
+        }
+        Location newLocation = new Location(world, x2 + originX, player.getLocation().getY(), z2 + originZ);
+        newLocation.setYaw(player.getLocation().getYaw() + (turnDirection == TurnDirection.LEFT ? -90 : 90));
+        player.teleport(newLocation);
+
     }
 
     private class AirshipBlock implements Comparable<AirshipBlock>
@@ -789,6 +829,7 @@ public class Airship
             this.z = z2 + originZ;
             this.d = (byte) (turnDirection == TurnDirection.RIGHT ? rotate90(this.t, this.d) : rotate90Reverse(this.t, this.d));
         }
+
 
         @Override
         public int compareTo(AirshipBlock o)
