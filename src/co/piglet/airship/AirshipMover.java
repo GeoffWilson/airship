@@ -19,6 +19,6 @@ public class AirshipMover implements Runnable
 
     @Override
     public void run() {
-        airship.moveAirship(BlockFace.EAST);
+        airship.moveAirship(airship.currentDirection);
     }
 }
