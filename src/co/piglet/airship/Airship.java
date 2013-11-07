@@ -126,7 +126,9 @@ public class Airship
         for (AirshipBlock block : blocks)
         {
             Location blockLocation = new Location(world, block.x, block.y, block.z);
-            if (blockLocation.equals(playerLocation))
+            if (blockLocation.getBlockX()==playerLocation.getBlockX()&&
+                    blockLocation.getBlockY()==playerLocation.getBlockY()&&
+                    blockLocation.getBlockZ()==playerLocation.getBlockZ())
             {
                 rotatePlayer = true;
             }
