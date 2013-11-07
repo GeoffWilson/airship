@@ -26,12 +26,19 @@ public class Airship
         LEFT, RIGHT
     }
 
-    public Airship(World world, Block initialBlock)
+    public Airship(World world, Block initialBlock, Player player)
     {
-        this.currentDirection = BlockFace.EAST;
         this.world = world;
+        this.owner = player;
         blocks = new ConcurrentLinkedQueue<>();
-
+        if (Math.abs(player.getLocation().getYaw()) >= 135)
+            currentDirection = BlockFace.NORTH;
+        else if (Math.abs(player.getLocation().getYaw()) <= 45)
+            currentDirection = BlockFace.SOUTH;
+        else if (player.getLocation().getYaw() < 0)
+            currentDirection = BlockFace.WEST;
+        else
+            currentDirection = BlockFace.EAST;
         // We need to scan the airship
         scanAirship(initialBlock);
     }
@@ -126,9 +133,9 @@ public class Airship
         for (AirshipBlock block : blocks)
         {
             Location blockLocation = new Location(world, block.x, block.y, block.z);
-            if (blockLocation.getBlockX()==playerLocation.getBlockX()&&
-                    blockLocation.getBlockY()==playerLocation.getBlockY()&&
-                    blockLocation.getBlockZ()==playerLocation.getBlockZ())
+            if (blockLocation.getBlockX() == playerLocation.getBlockX() &&
+                    blockLocation.getBlockY() == playerLocation.getBlockY() &&
+                    blockLocation.getBlockZ() == playerLocation.getBlockZ())
             {
                 rotatePlayer = true;
             }
