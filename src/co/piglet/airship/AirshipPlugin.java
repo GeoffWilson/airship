@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -128,6 +129,78 @@ public class AirshipPlugin extends JavaPlugin implements Listener
 
                         Airship targetShip = airships.get(airshipName);
                         targetShip.rotateAirship(Airship.TurnDirection.RIGHT);
+                    }
+
+                    if (action.equals("up"))
+                    {
+                        if (!airships.containsKey(airshipName))
+                        {
+                            player.sendMessage("No airship by this name found");
+                            return false;
+                        }
+                        Airship targetShip = airships.get(airshipName);
+                        if (targetShip.currentDirection != BlockFace.UP && targetShip.currentDirection != BlockFace.DOWN)
+                        {
+                            targetShip.lastDirection = targetShip.currentDirection;
+                        }
+                        targetShip.currentDirection = BlockFace.UP;
+                        targetShip.isReversing = false;
+                    }
+
+                    if (action.equals("down"))
+                    {
+                        if (!airships.containsKey(airshipName))
+                        {
+                            player.sendMessage("No airship by this name found");
+                            return false;
+                        }
+                        Airship targetShip = airships.get(airshipName);
+                        if (targetShip.currentDirection != BlockFace.UP && targetShip.currentDirection != BlockFace.DOWN)
+                        {
+                            targetShip.lastDirection = targetShip.currentDirection;
+                        }
+                        targetShip.currentDirection = BlockFace.DOWN;
+                        targetShip.isReversing = false;
+
+                    }
+
+                    if (action.equals("forward"))
+                    {
+                        if (!airships.containsKey(airshipName))
+                        {
+                            player.sendMessage("No airship by this name found");
+                            return false;
+                        }
+
+                        Airship targetShip = airships.get(airshipName);
+                        targetShip.isReversing = false;
+                        if (targetShip.currentDirection == BlockFace.UP || targetShip.currentDirection == BlockFace.DOWN)
+                        {
+                            targetShip.currentDirection = targetShip.lastDirection;
+                        }
+
+                    }
+
+                    if (action.equals("reverse"))
+                    {
+                        if (!airships.containsKey(airshipName))
+                        {
+                            player.sendMessage("No airship by this name found");
+                            return false;
+                        }
+                        Airship targetShip = airships.get(airshipName);
+                        if (targetShip.isReversing)
+                        {
+                            player.sendMessage("Airship is already reversing!");
+                            return false;
+                        }
+                        if (targetShip.currentDirection == BlockFace.UP || targetShip.currentDirection == BlockFace.DOWN)
+                        {
+                            targetShip.currentDirection = targetShip.lastDirection;
+                        }
+                        targetShip.isReversing = true;
+
+
                     }
 
                     if (action.equals("create"))

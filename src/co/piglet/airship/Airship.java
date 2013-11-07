@@ -1,5 +1,6 @@
 package co.piglet.airship;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -20,6 +21,8 @@ public class Airship
     public BlockFace currentDirection;
 
     public boolean isMoving;
+    public boolean isReversing;
+    public BlockFace lastDirection;
 
     public enum TurnDirection
     {
@@ -31,16 +34,18 @@ public class Airship
         this.world = world;
         this.owner = player;
         blocks = new ConcurrentLinkedQueue<>();
+        Bukkit.getLogger().info(String.valueOf(player.getLocation().getYaw()));
         if (Math.abs(player.getLocation().getYaw()) >= 135)
             currentDirection = BlockFace.NORTH;
         else if (Math.abs(player.getLocation().getYaw()) <= 45)
             currentDirection = BlockFace.SOUTH;
         else if (player.getLocation().getYaw() < 0)
-            currentDirection = BlockFace.WEST;
-        else
             currentDirection = BlockFace.EAST;
+        else
+            currentDirection = BlockFace.WEST;
         // We need to scan the airship
         scanAirship(initialBlock);
+        lastDirection = currentDirection;
     }
 
     public void rescanAirship()
@@ -793,25 +798,32 @@ public class Airship
         public void shiftBlock(BlockFace direction)
         {
             int xDelta = 0;
+            int yDelta = 0;
             int zDelta = 0;
 
             switch (direction)
             {
                 case EAST:
-                    xDelta = 1;
+                    xDelta = isReversing ? -1 : 1;
                     break;
                 case WEST:
-                    xDelta = -1;
+                    xDelta = isReversing ? 1 : -1;
                     break;
                 case NORTH:
-                    zDelta = -1;
+                    zDelta = isReversing ? 1 : -1;
                     break;
                 case SOUTH:
-                    zDelta = 1;
+                    zDelta = isReversing ? -1 : 1;
                     break;
+                case UP:
+                    yDelta = 1;
+                    break;
+                case DOWN:
+                    yDelta = -1;
             }
 
             x += xDelta;
+            y += yDelta;
             z += zDelta;
         }
 
