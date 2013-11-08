@@ -31,7 +31,7 @@ public class Airship
         LEFT, RIGHT
     }
 
-    public Airship(World world, Block initialBlock, Player player)
+    public Airship(World world, Block initialBlock, Player player) throws IllegalAirshipException
     {
         this.world = world;
         this.owner = player;
@@ -65,10 +65,17 @@ public class Airship
     {
         AirshipBlock b = blocks.peek();
         blocks.clear();
-        scanAirship(world.getBlockAt(b.x, b.y, b.z));
+        try
+        {
+            scanAirship(world.getBlockAt(b.x, b.y, b.z));
+        }
+        catch (IllegalAirshipException e)
+        {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 
-    private void scanAirship(Block block)
+    private void scanAirship(Block block) throws IllegalAirshipException
     {
         // Create array to hold the 6 block neighbours
         Block neighbours[] = new Block[26];
@@ -112,6 +119,10 @@ public class Airship
             {
                 if ((b.t == Material.AIR && i < 6) || b.t != Material.AIR)
                     blocks.add(b);
+                if (blocks.size()>5000)
+                {
+                    throw new IllegalAirshipException("Too many blocks son!");
+                }
                 if (b.t != Material.AIR)
                     scanAirship(neighbours[i]);
             }

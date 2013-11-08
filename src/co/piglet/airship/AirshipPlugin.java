@@ -223,10 +223,40 @@ public class AirshipPlugin extends JavaPlugin implements Listener
 
                         World world = player.getWorld();
 
-                        Airship newAirship = new Airship(world, world.getBlockAt(initialLocation), player);
-                        airships.put(airshipName, newAirship);
+                        Airship newAirship = null;
+                        try
+                        {
+                            newAirship = new Airship(world, world.getBlockAt(initialLocation), player);
+                            airships.put(airshipName, newAirship);
 
-                        player.sendMessage("Airship created!");
+                            player.sendMessage("Airship created!");
+                        }
+                        catch (IllegalAirshipException e)
+                        {
+                            player.sendMessage("Airship creation failed: " + e.getMessage());
+                        }
+
+                    }
+
+                    if (action.equals("delete"))
+                    {
+                        if (airships.containsKey(airshipName))
+                        {
+                            airships.remove(airshipName);
+                            player.sendMessage(airshipName + " deleted!");
+                        }
+                        else
+                        {
+                            player.sendMessage("That airship does not exist!");
+                        }
+                    }
+
+                    if (action.equals("list"))
+                    {
+                        for (String airship : airships.keySet())
+                        {
+                            player.sendMessage(airship);
+                        }
                     }
                 }
 
