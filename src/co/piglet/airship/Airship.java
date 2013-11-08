@@ -23,6 +23,7 @@ public class Airship
     public boolean isMoving;
     public boolean isReversing;
     public BlockFace lastDirection;
+    public float absoluteYaw;
 
     public enum TurnDirection
     {
@@ -35,11 +36,21 @@ public class Airship
         this.owner = player;
         blocks = new ConcurrentLinkedQueue<>();
         Bukkit.getLogger().info(String.valueOf(player.getLocation().getYaw()));
-        if (Math.abs(player.getLocation().getYaw()) >= 135)
+        absoluteYaw = player.getLocation().getYaw();
+        while (absoluteYaw > 180)
+        {
+            absoluteYaw = absoluteYaw - 360;
+        }
+        while (absoluteYaw < -180)
+        {
+            absoluteYaw = absoluteYaw + 360;
+        }
+
+        if (Math.abs(absoluteYaw) >= 135)
             currentDirection = BlockFace.NORTH;
-        else if (Math.abs(player.getLocation().getYaw()) <= 45)
+        else if (Math.abs(absoluteYaw) <= 45)
             currentDirection = BlockFace.SOUTH;
-        else if (player.getLocation().getYaw() < 0)
+        else if (absoluteYaw < 0)
             currentDirection = BlockFace.EAST;
         else
             currentDirection = BlockFace.WEST;
@@ -58,7 +69,7 @@ public class Airship
     private void scanAirship(Block block)
     {
         // Create array to hold the 6 block neighbours
-        Block neighbours[] = new Block[18];
+        Block neighbours[] = new Block[26];
 
         // Get the blocks neighbours
         neighbours[0] = block.getRelative(BlockFace.NORTH);
@@ -68,27 +79,38 @@ public class Airship
         neighbours[4] = block.getRelative(BlockFace.UP);
         neighbours[5] = block.getRelative(BlockFace.DOWN);
 
-        neighbours[6] = block.getRelative(BlockFace.EAST_NORTH_EAST);
-        neighbours[7] = block.getRelative(BlockFace.EAST_SOUTH_EAST);
-        neighbours[8] = block.getRelative(BlockFace.NORTH_NORTH_EAST);
-        neighbours[9] = block.getRelative(BlockFace.NORTH_NORTH_WEST);
-        neighbours[10] = block.getRelative(BlockFace.SOUTH_SOUTH_EAST);
-        neighbours[11] = block.getRelative(BlockFace.SOUTH_SOUTH_WEST);
-        neighbours[12] = block.getRelative(BlockFace.WEST_NORTH_WEST);
-        neighbours[13] = block.getRelative(BlockFace.WEST_SOUTH_WEST);
+        neighbours[6] = block.getRelative(1, 0, 1);
+        neighbours[7] = block.getRelative(1, 0, -1);
+        neighbours[8] = block.getRelative(-1, 0, 1);
+        neighbours[9] = block.getRelative(-1, 0, -1);
 
-        neighbours[14] = block.getRelative(BlockFace.NORTH_EAST);
-        neighbours[15] = block.getRelative(BlockFace.NORTH_WEST);
-        neighbours[16] = block.getRelative(BlockFace.SOUTH_EAST);
-        neighbours[17] = block.getRelative(BlockFace.SOUTH_WEST);
+        neighbours[10] = block.getRelative(0, 1, 1);
+        neighbours[11] = block.getRelative(0, 1, -1);
+        neighbours[12] = block.getRelative(1, 1, 0);
+        neighbours[13] = block.getRelative(-1, 1, 0);
+        neighbours[14] = block.getRelative(1, 1, 1);
+        neighbours[15] = block.getRelative(1, 1, -1);
+        neighbours[16] = block.getRelative(-1, 1, 1);
+        neighbours[17] = block.getRelative(-1, 1, -1);
+
+        neighbours[18] = block.getRelative(0, -1, 1);
+        neighbours[19] = block.getRelative(0, -1, -1);
+        neighbours[20] = block.getRelative(1, -1, 0);
+        neighbours[21] = block.getRelative(-1, -1, 0);
+        neighbours[22] = block.getRelative(1, -1, 1);
+        neighbours[23] = block.getRelative(1, -1, -1);
+        neighbours[24] = block.getRelative(-1, -1, 1);
+        neighbours[25] = block.getRelative(-1, -1, -1);
+
 
         for (Block neighbour : neighbours)
         {
             AirshipBlock b = new AirshipBlock(neighbour);
-            if (b.t != Material.AIR && !blocks.contains(b))
+            if (!blocks.contains(b))
             {
                 blocks.add(b);
-                scanAirship(neighbour);
+                if (b.t != Material.AIR)
+                    scanAirship(neighbour);
             }
         }
     }
@@ -97,12 +119,7 @@ public class Airship
     {
         for (AirshipBlock block : blocks)
         {
-            world.getBlockAt(block.x, block.y, block.z).setType(Material.AIR);
             block.shiftBlock(direction);
-        }
-
-        for (AirshipBlock block : blocks)
-        {
             Block newBlock = world.getBlockAt(block.x, block.y, block.z);
             newBlock.setType(block.t);
             newBlock.setData(block.d);
