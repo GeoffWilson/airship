@@ -25,6 +25,7 @@ public class Airship
     public BlockFace lastDirection;
     public float absoluteYaw;
 
+
     public enum TurnDirection
     {
         LEFT, RIGHT
@@ -56,6 +57,7 @@ public class Airship
             currentDirection = BlockFace.WEST;
         // We need to scan the airship
         scanAirship(initialBlock);
+
         lastDirection = currentDirection;
     }
 
@@ -103,27 +105,35 @@ public class Airship
         neighbours[25] = block.getRelative(-1, -1, -1);
 
 
-        for (Block neighbour : neighbours)
+        for (int i = 0; i < neighbours.length; i++)
         {
-            AirshipBlock b = new AirshipBlock(neighbour);
+            AirshipBlock b = new AirshipBlock(neighbours[i]);
             if (!blocks.contains(b))
             {
-                blocks.add(b);
+                if ((b.t == Material.AIR && i < 6) || b.t != Material.AIR)
+                    blocks.add(b);
                 if (b.t != Material.AIR)
-                    scanAirship(neighbour);
+                    scanAirship(neighbours[i]);
             }
         }
     }
 
     public void moveAirship(BlockFace direction)
     {
+
         for (AirshipBlock block : blocks)
         {
             block.shiftBlock(direction);
             Block newBlock = world.getBlockAt(block.x, block.y, block.z);
+            if (newBlock.getType() == block.t && newBlock.getData() == block.d)
+                continue;
+
             newBlock.setType(block.t);
             newBlock.setData(block.d);
+
+
         }
+
     }
 
     public void rotateAirship(TurnDirection turnDirection)
