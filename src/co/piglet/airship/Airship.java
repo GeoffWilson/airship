@@ -7,6 +7,8 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.List;
@@ -19,6 +21,7 @@ public class Airship
     private World world;
     public Player owner;
     public BlockFace currentDirection;
+    public Plugin owningPluigin;
 
     public boolean isMoving;
     public boolean isReversing;
@@ -48,13 +51,21 @@ public class Airship
         }
 
         if (Math.abs(absoluteYaw) >= 135)
+        {
             currentDirection = BlockFace.NORTH;
+        }
         else if (Math.abs(absoluteYaw) <= 45)
+        {
             currentDirection = BlockFace.SOUTH;
+        }
         else if (absoluteYaw < 0)
+        {
             currentDirection = BlockFace.EAST;
+        }
         else
+        {
             currentDirection = BlockFace.WEST;
+        }
         // We need to scan the airship
         scanAirship(initialBlock);
 
@@ -71,7 +82,7 @@ public class Airship
         }
         catch (IllegalAirshipException e)
         {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
     }
 
@@ -118,33 +129,37 @@ public class Airship
             if (!blocks.contains(b))
             {
                 if ((b.t == Material.AIR && i < 6) || b.t != Material.AIR)
+                {
                     blocks.add(b);
-                if (blocks.size()>5000)
+                }
+                if (blocks.size() > 5000)
                 {
                     throw new IllegalAirshipException("Too many blocks son!");
                 }
                 if (b.t != Material.AIR)
+                {
                     scanAirship(neighbours[i]);
+                }
             }
         }
     }
 
     public void moveAirship(BlockFace direction)
     {
-
         for (AirshipBlock block : blocks)
         {
             block.shiftBlock(direction);
             Block newBlock = world.getBlockAt(block.x, block.y, block.z);
+            newBlock.setMetadata("airship-data", new FixedMetadataValue(owningPluigin, "1"));
+
             if (newBlock.getType() == block.t && newBlock.getData() == block.d)
+            {
                 continue;
+            }
 
             newBlock.setType(block.t);
             newBlock.setData(block.d);
-
-
         }
-
     }
 
     public void rotateAirship(TurnDirection turnDirection)
@@ -157,13 +172,21 @@ public class Airship
         for (AirshipBlock block : blocks)
         {
             if (block.x > maxX)
+            {
                 maxX = block.x;
+            }
             if (block.x < minX)
+            {
                 minX = block.x;
+            }
             if (block.z > maxZ)
+            {
                 maxZ = block.z;
+            }
             if (block.z < minZ)
+            {
                 minZ = block.z;
+            }
         }
 
         int originX = (maxX + minX) / 2;
@@ -433,7 +456,9 @@ public class Airship
                 case HAY_BLOCK:
                 case LOG:
                     if (data >= 4 && data <= 11)
+                    {
                         data ^= 0xc;
+                    }
                     break;
 
                 case REDSTONE_COMPARATOR_OFF:
@@ -490,7 +515,9 @@ public class Airship
                 case BROWN_MUSHROOM:
                 case RED_MUSHROOM:
                     if (data >= 10)
+                    {
                         return data;
+                    }
                     return (data * 7) % 10;
 
                 case VINE:
@@ -715,7 +742,9 @@ public class Airship
                 case HAY_BLOCK:
                 case LOG:
                     if (data >= 4 && data <= 11)
+                    {
                         data ^= 0xc;
+                    }
                     break;
 
                 case REDSTONE_COMPARATOR_ON:
@@ -773,7 +802,9 @@ public class Airship
                 case BROWN_MUSHROOM:
                 case RED_MUSHROOM:
                     if (data >= 10)
+                    {
                         return data;
+                    }
                     return (data * 3) % 10;
 
                 case VINE:
@@ -894,11 +925,17 @@ public class Airship
         public int compareTo(AirshipBlock o)
         {
             if (o.x < this.x)
+            {
                 return -1;
+            }
             else if (o.x == this.x)
+            {
                 return 0;
+            }
             else
+            {
                 return 1;
+            }
         }
     }
 }

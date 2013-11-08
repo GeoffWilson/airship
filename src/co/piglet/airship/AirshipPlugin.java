@@ -4,18 +4,20 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AirshipPlugin extends JavaPlugin implements Listener
 {
-
     private ConcurrentHashMap<String, Airship> airships;
 
     @Override
@@ -29,6 +31,16 @@ public class AirshipPlugin extends JavaPlugin implements Listener
     @Override
     public void onDisable()
     {
+    }
+
+    @EventHandler
+    public void onBlockBreak(BlockBreakEvent event)
+    {
+        Block eventBlock = event.getBlock();
+        if (eventBlock.hasMetadata("airship-data"))
+        {
+            eventBlock.getDrops().clear();
+        }
     }
 
     public String[] getAirships()
@@ -46,7 +58,6 @@ public class AirshipPlugin extends JavaPlugin implements Listener
 
                 if (sender instanceof Player)
                 {
-
                     // Get the player
                     Player player = (Player) sender;
 
@@ -74,7 +85,7 @@ public class AirshipPlugin extends JavaPlugin implements Listener
                         {
                             targetShip.rescanAirship();
                             player.playSound(player.getLocation(), Sound.PORTAL, 1.0f, 1.0f);
-                            targetShip.task = Bukkit.getScheduler().runTaskTimer(this, new AirshipMover(airships.get(airshipName)), 0, 50);
+                            targetShip.task = Bukkit.getScheduler().runTaskTimer(this, new AirshipMover(airships.get(airshipName)), 0, 20);
                             targetShip.isMoving = true;
                         }
                         else

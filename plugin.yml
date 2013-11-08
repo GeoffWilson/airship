@@ -1,0 +1,12 @@
+name: PigletAirship
+main: co.piglet.airship.AirshipPlugin
+version: 1.0
+
+commands:
+  validate:
+    description: Airships!
+    usage: Command syntax is /airship
+    permission: airship.airship
+    permission-message: You don't have the airship.airship permission
+  airship:
+    permission: airship.airship
