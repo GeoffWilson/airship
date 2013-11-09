@@ -142,9 +142,9 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
 
                         World world = player.getWorld();
 
-                        Airship newAirship = null;
                         try {
-                            newAirship = new Airship(world, world.getBlockAt(initialLocation), player);
+                            Airship newAirship = new Airship(world, world.getBlockAt(initialLocation), player);
+                            newAirship.owningPlugin = this;
                             airships.put(airshipName, newAirship);
 
                             player.sendMessage("Airship created!");
