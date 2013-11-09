@@ -39,7 +39,6 @@ public class Airship
         this.world = world;
         this.owner = player;
         blocks = new ConcurrentLinkedQueue<>();
-        Bukkit.getLogger().info(String.valueOf(player.getLocation().getYaw()));
         absoluteYaw = player.getLocation().getYaw();
         while (absoluteYaw > 180)
         {
