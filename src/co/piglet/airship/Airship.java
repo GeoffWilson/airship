@@ -11,6 +11,8 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -26,7 +28,6 @@ public class Airship
     public boolean isMoving;
     public boolean isReversing;
     public BlockFace lastDirection;
-    public float absoluteYaw;
 
 
     public enum TurnDirection
@@ -39,7 +40,16 @@ public class Airship
         this.world = world;
         this.owner = player;
         blocks = new ConcurrentLinkedQueue<>();
-        absoluteYaw = player.getLocation().getYaw();
+        currentDirection = playerDirection(player);
+        // We need to scan the airship
+        scanAirship(initialBlock);
+
+        lastDirection = currentDirection;
+    }
+
+    private BlockFace playerDirection(Player player)
+    {
+        float absoluteYaw = player.getLocation().getYaw();
         while (absoluteYaw > 180)
         {
             absoluteYaw = absoluteYaw - 360;
@@ -51,24 +61,20 @@ public class Airship
 
         if (Math.abs(absoluteYaw) >= 135)
         {
-            currentDirection = BlockFace.NORTH;
+            return BlockFace.NORTH;
         }
         else if (Math.abs(absoluteYaw) <= 45)
         {
-            currentDirection = BlockFace.SOUTH;
+            return BlockFace.SOUTH;
         }
         else if (absoluteYaw < 0)
         {
-            currentDirection = BlockFace.EAST;
+            return BlockFace.EAST;
         }
         else
         {
-            currentDirection = BlockFace.WEST;
+            return BlockFace.WEST;
         }
-        // We need to scan the airship
-        scanAirship(initialBlock);
-
-        lastDirection = currentDirection;
     }
 
     public void rescanAirship()
@@ -87,39 +93,32 @@ public class Airship
 
     private void scanAirship(Block block) throws IllegalAirshipException
     {
-        // Create array to hold the 6 block neighbours
+        // Create array to hold the 26 block neighbours
         Block neighbours[] = new Block[26];
 
-        // Get the blocks neighbours
-        neighbours[0] = block.getRelative(BlockFace.NORTH);
-        neighbours[1] = block.getRelative(BlockFace.EAST);
-        neighbours[2] = block.getRelative(BlockFace.SOUTH);
-        neighbours[3] = block.getRelative(BlockFace.WEST);
-        neighbours[4] = block.getRelative(BlockFace.UP);
-        neighbours[5] = block.getRelative(BlockFace.DOWN);
+        // Create array to hold the 6 nearest neighbours
+        ArrayList<Integer> nearestNeighbours = new ArrayList<>();
+        nearestNeighbours.add(4);
+        nearestNeighbours.add(10);
+        nearestNeighbours.add(12);
+        nearestNeighbours.add(13);
+        nearestNeighbours.add(15);
+        nearestNeighbours.add(21);
 
-        neighbours[6] = block.getRelative(1, 0, 1);
-        neighbours[7] = block.getRelative(1, 0, -1);
-        neighbours[8] = block.getRelative(-1, 0, 1);
-        neighbours[9] = block.getRelative(-1, 0, -1);
+        int x = 0;
 
-        neighbours[10] = block.getRelative(0, 1, 1);
-        neighbours[11] = block.getRelative(0, 1, -1);
-        neighbours[12] = block.getRelative(1, 1, 0);
-        neighbours[13] = block.getRelative(-1, 1, 0);
-        neighbours[14] = block.getRelative(1, 1, 1);
-        neighbours[15] = block.getRelative(1, 1, -1);
-        neighbours[16] = block.getRelative(-1, 1, 1);
-        neighbours[17] = block.getRelative(-1, 1, -1);
-
-        neighbours[18] = block.getRelative(0, -1, 1);
-        neighbours[19] = block.getRelative(0, -1, -1);
-        neighbours[20] = block.getRelative(1, -1, 0);
-        neighbours[21] = block.getRelative(-1, -1, 0);
-        neighbours[22] = block.getRelative(1, -1, 1);
-        neighbours[23] = block.getRelative(1, -1, -1);
-        neighbours[24] = block.getRelative(-1, -1, 1);
-        neighbours[25] = block.getRelative(-1, -1, -1);
+        for (int i = -1; i < 1; i++)
+        {
+            for (int j = -1; j < 1; j++)
+            {
+                for (int k = -1; k < 1; k++)
+                {
+                    if (i == 0 && j == 0 && k == 0)
+                        continue;
+                    neighbours[x++] = block.getRelative(i, j, k);
+                }
+            }
+        }
 
 
         for (int i = 0; i < neighbours.length; i++)
@@ -127,7 +126,7 @@ public class Airship
             AirshipBlock b = new AirshipBlock(neighbours[i]);
             if (!blocks.contains(b))
             {
-                if ((b.t == Material.AIR && i < 6) || b.t != Material.AIR)
+                if ((b.t == Material.AIR && Arrays.asList(nearestNeighbours).contains(i)) || b.t != Material.AIR)
                 {
                     blocks.add(b);
                 }
