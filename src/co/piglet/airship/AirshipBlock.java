@@ -606,7 +606,7 @@ public class AirshipBlock implements Comparable<AirshipBlock> {
         // Check if the object to compare is an AirshipBlock
         if (other instanceof AirshipBlock) {
 
-            // Case the other object to and AirshipBlock
+            // Cast the other object to and AirshipBlock
             AirshipBlock otherBlock = (AirshipBlock) other;
 
             // Return true if the x,y and z values are equal between this block and the other block

@@ -45,6 +45,7 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
 
     /**
      * Called when the plugin is disabled by CraftBukkit (on shutdown normally)
+     * TODO: This should save the airships to disk/database
      */
     @Override
     public void onDisable() {
