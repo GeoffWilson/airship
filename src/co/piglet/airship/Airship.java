@@ -1,8 +1,6 @@
 package co.piglet.airship;
 
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -122,6 +120,21 @@ public class Airship {
 
             newBlock.setType(block.t);
             newBlock.setData(block.d);
+        }
+    }
+
+    public void startAirship(AirshipPlugin plugin) {
+        if (!isMoving) {
+            owner.playSound(owner.getLocation(), Sound.PORTAL, 1.0f, 1.0f);
+            task = Bukkit.getScheduler().runTaskTimer(plugin, new AirshipMover(this), 0, 50);
+            isMoving = true;
+        }
+    }
+
+    public void stopAirship() {
+        if (isMoving) {
+            task.cancel();
+            isMoving = false;
         }
     }
 
