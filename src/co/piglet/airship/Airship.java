@@ -96,7 +96,7 @@ public class Airship {
     /**
      * Rescan the blocks in the airship based on the first block.
      */
-    /*
+    @SuppressWarnings("unused")
     public void rescanAirship() {
         // Get the first block in the airship (index 0)
         AirshipBlock b = blocks.get(0);
@@ -111,7 +111,7 @@ public class Airship {
             e.printStackTrace();
         }
     }
-    */
+
 
     /**
      * Recursive function to scan all of the blocks in the airship, takes the initial block and scans all neighbours
