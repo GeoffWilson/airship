@@ -79,7 +79,7 @@ public class Airship {
         float absoluteYaw = player.getLocation().getYaw();
 
         // Adjust the yaw if it is outside the expected range
-        absoluteYaw = Math.abs(absoluteYaw) > 180.00 ? absoluteYaw % 360 : absoluteYaw;
+        absoluteYaw = Math.abs(absoluteYaw) > 180.00 ? (((Math.abs(absoluteYaw)+180) % 360)-180)*(absoluteYaw/Math.abs(absoluteYaw)) : absoluteYaw;
 
         // Return the direction the player is facing based on the Yaw
         if (Math.abs(absoluteYaw) >= 135) {
