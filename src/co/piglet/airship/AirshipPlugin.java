@@ -7,8 +7,11 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -108,11 +111,16 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                     // Get the player
                     Player player = (Player) sender;
 
-                    // Check we have the necessary number of parameters
+                    String action;
+                    String airshipName;
+
+
+                    // Check for correct number of arguments and set action type and airship name
                     if (args.length == 1) {
 
-                        // The only command we support here is '/airship list'
-                        if (args[0].equals("list")) {
+                        action = args[0];
+
+                        if (action.equals("list")) {
 
                             // Loop through each airship in the collection
                             for (String airship : airships.keySet()) {
@@ -120,145 +128,171 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                                 // Send the name of the airship to the player
                                 player.sendMessage(airship);
                             }
-                        }
-                        return true;
-
-                    } else if (args.length != 2) {
-
-                        // Less than two arguments (and not /airship list)
-                        sender.sendMessage("Command is /airship ACTION AIRSHIP");
-                        return true;
-                    }
-
-                    // Get the action and airship name from the arguments
-                    String action = args[0];
-                    String airshipName = args[1];
-
-
-                    // Check if the airship specified exists (or that this is a create command)
-                    if (!airships.containsKey(airshipName) && !action.equals("create")) {
-
-                        // Inform the player that this airship doesn't exist
-                        player.sendMessage("No airship by this name found");
-                        return true;
-                    }
-
-                    // Get the target airship from then collection
-                    Airship targetShip = airships.get(airshipName);
-
-                    // This handles the '/airship stop' command
-                    if (action.equals("stop")) {
-
-                        // Stop the target airship
-                        targetShip.stopAirship();
-                    }
-
-                    // This handles the '/airship left' command
-                    if (action.equals("left")) {
-
-                        // Turn the target airship left
-                        targetShip.rotateAirship(TurnDirection.LEFT);
-                    }
-
-                    // This handles the '/airship right' command
-                    if (action.equals("right")) {
-
-                        // Turn the airship right
-                        targetShip.rotateAirship(TurnDirection.RIGHT);
-                    }
-
-                    // This handles the '/airship up' and '/airship down' command
-                    if (action.equals("up") || action.equals("down")) {
-
-                        // If the airship is not currently moving up or down we must store the current direction for later
-                        if (targetShip.currentDirection != BlockFace.UP && targetShip.currentDirection != BlockFace.DOWN) {
-                            targetShip.lastDirection = targetShip.currentDirection;
-                        }
-
-                        // Set the current direction of the airship to up or down
-                        targetShip.currentDirection = action.equals("up") ? BlockFace.UP : BlockFace.DOWN;
-
-                        // We are no longer reversing the airship
-                        targetShip.isReversing = false;
-
-                        // Start the airship
-                        targetShip.startAirship(this);
-                    }
-
-                    // This handles the '/airship forward' and '/airship reverse' commands
-                    if (action.equals("forward") || action.equals("reverse")) {
-
-                        // Set the reversing flag as necessary
-                        targetShip.isReversing = action.equals("reverse");
-
-                        // If the current direction is up or down then set back to the direction before these
-                        if (targetShip.currentDirection == BlockFace.UP || targetShip.currentDirection == BlockFace.DOWN) {
-                            targetShip.currentDirection = targetShip.lastDirection;
-                        }
-
-                        // Start the airship
-                        targetShip.startAirship(this);
-                    }
-
-                    // This handles the '/airship create' command
-                    if (action.equals("create")) {
-
-                        // Check if the player is flying
-                        if (player.isFlying()) {
-
-                            // Send the player a message if they are flying as we can't create an airship in this case
-                            player.sendMessage("Can't create an airship while flying, please stand on the flight deck");
                             return true;
                         }
 
-                        // Check if the airship name already exists
-                        if (airships.containsKey(airshipName)) {
+                        // DERPY MESS DOESNT WORK AFTER RELOAD, this check doesnt catch dead meta
 
-                            // Inform the player an airship by this name already exists
-                            sender.sendMessage("An airship with this name already exists");
+                        List<MetadataValue> meta = player.getMetadata("activeAirship");
+
+                        if (meta == null) {
+                            player.sendMessage("You don't have an active airship!");
                             return true;
                         }
 
-                        // Get the location of the player who issued the create command
-                        Location initialLocation = player.getLocation();
+                        //then this murders the plugin
 
-                        // Adjust the location to one block below (this is the block the player is stood on)
-                        initialLocation.setY(initialLocation.getBlockY() - 1);
+                        airshipName = player.getMetadata("activeAirship").get(0).asString();
+                        player.sendMessage(airshipName);
 
-                        // Get the world the player is in
-                        World world = player.getWorld();
+                        // Get the target airship from then collection
+                        Airship targetShip = airships.get(airshipName);
 
-                        try {
-                            // Create a new Airship object for the world, player and specified initial block
-                            Airship newAirship = new Airship(world, world.getBlockAt(initialLocation), player);
+                        // This handles the '/airship stop' command
+                        if (action.equals("stop")) {
 
-                            // Set this plugin as the owner of the new airship
-                            newAirship.owningPlugin = this;
-
-                            // Add the airship to the collection
-                            airships.put(airshipName, newAirship);
-
-                            // Inform the player that this airship has been created successfully
-                            player.sendMessage(String.format("Airship '%s' created!", airshipName));
-
-                        } catch (IllegalAirshipException e) {
-
-                            // The scan of the airship failed, we need to inform the player
-                            player.sendMessage("Airship creation failed: " + e.getMessage());
+                            // Stop the target airship
+                            targetShip.stopAirship();
                         }
+
+                        // This handles the '/airship left' command
+                        if (action.equals("left")) {
+
+                            // Turn the target airship left
+                            targetShip.rotateAirship(TurnDirection.LEFT);
+                        }
+
+                        // This handles the '/airship right' command
+                        if (action.equals("right")) {
+
+                            // Turn the airship right
+                            targetShip.rotateAirship(TurnDirection.RIGHT);
+                        }
+
+                        // This handles the '/airship up' and '/airship down' command
+                        if (action.equals("up") || action.equals("down")) {
+
+                            // If the airship is not currently moving up or down we must store the current direction for later
+                            if (targetShip.currentDirection != BlockFace.UP && targetShip.currentDirection != BlockFace.DOWN) {
+                                targetShip.lastDirection = targetShip.currentDirection;
+                            }
+
+                            // Set the current direction of the airship to up or down
+                            targetShip.currentDirection = action.equals("up") ? BlockFace.UP : BlockFace.DOWN;
+
+                            // We are no longer reversing the airship
+                            targetShip.isReversing = false;
+
+                            // Start the airship
+                            targetShip.startAirship(this);
+                        }
+
+                        // This handles the '/airship forward' and '/airship reverse' commands
+                        if (action.equals("forward") || action.equals("reverse")) {
+
+                            // Set the reversing flag as necessary
+                            targetShip.isReversing = action.equals("reverse");
+
+                            // If the current direction is up or down then set back to the direction before these
+                            if (targetShip.currentDirection == BlockFace.UP || targetShip.currentDirection == BlockFace.DOWN) {
+                                targetShip.currentDirection = targetShip.lastDirection;
+                            }
+
+                            // Start the airship
+                            targetShip.startAirship(this);
+                        }
+
+                    } else if (args.length == 2) {
+
+                        action = args[0];
+                        airshipName = args[1];
+
+                        // Check if the airship specified exists (or that this is a create command)
+                        if (!airships.containsKey(airshipName) && !action.equals("create")) {
+
+                            // Inform the player that this airship doesn't exist
+                            player.sendMessage("No airship by this name found");
+                            return true;
+                        }
+
+                        // This handles the '/airship create' command
+                        if (action.equals("create")) {
+
+                            // Check if the player is flying
+                            if (player.isFlying()) {
+
+                                // Send the player a message if they are flying as we can't create an airship in this case
+                                player.sendMessage("Can't create an airship while flying, please stand on the flight deck");
+                                return true;
+                            }
+
+                            // Check if the airship name already exists
+                            if (airships.containsKey(airshipName)) {
+
+                                // Inform the player an airship by this name already exists
+                                sender.sendMessage("An airship with this name already exists");
+                                return true;
+                            }
+
+                            // Get the location of the player who issued the create command
+                            Location initialLocation = player.getLocation();
+
+                            // Adjust the location to one block below (this is the block the player is stood on)
+                            initialLocation.setY(initialLocation.getBlockY() - 1);
+
+                            // Get the world the player is in
+                            World world = player.getWorld();
+
+                            try {
+                                // Create a new Airship object for the world, player and specified initial block
+                                Airship newAirship = new Airship(world, world.getBlockAt(initialLocation), player);
+
+                                // Set this plugin as the owner of the new airship
+                                newAirship.owningPlugin = this;
+
+                                // Add the airship to the collection
+                                airships.put(airshipName, newAirship);
+
+                                // Inform the player that this airship has been created successfully
+                                player.sendMessage(String.format("Airship '%s' created!", airshipName));
+
+                            } catch (IllegalAirshipException e) {
+
+                                // The scan of the airship failed, we need to inform the player
+                                player.sendMessage("Airship creation failed: " + e.getMessage());
+                            }
+                        }
+
+
+                        // This handles the '/airship delete' command
+                        if (action.equals("delete")) {
+
+                            // Get the target airship from then collection
+                            Airship targetShip = airships.get(airshipName);
+
+                            // Stop the airship
+                            targetShip.stopAirship();
+
+                            // Remove the airship from the collection
+                            airships.remove(airshipName);
+                            player.sendMessage(String.format("Airship '%s' deleted!", airshipName));
+
+                        }
+
+                        // This handles the '/airship activate' command
+                        if (action.equals("activate")) {
+                            player.setMetadata("activeAirship", new FixedMetadataValue(this, airshipName));
+                            player.sendMessage(airshipName + " activated!");
+                        }
+
+                    } else {
+
+                        player.sendMessage("Type /airship help for a list of commands.");
+                        return true;
+
                     }
 
-                    // This handles the '/airship delete' command
-                    if (action.equals("delete")) {
 
-                        // Stop the airship
-                        targetShip.stopAirship();
-
-                        // Remove the airship from the collection
-                        airships.remove(airshipName);
-                        player.sendMessage(String.format("Airship '%s' deleted!", airshipName));
-
-                    }
                 }
 
                 break;
