@@ -140,7 +140,7 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                             return true;
                         }
 
-                        //then this murders the plugin
+                        //then this murders the plugin horribly
 
                         airshipName = player.getMetadata("activeAirship").get(0).asString();
                         player.sendMessage(airshipName);
