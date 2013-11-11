@@ -8,6 +8,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -26,7 +27,7 @@ public class Airship {
     private World world;
 
     // The player who owns this airship
-    public Player owner;
+    public String owner;
 
     // The current direction of travel for the airship
     public BlockFace currentDirection;
@@ -48,12 +49,13 @@ public class Airship {
 
     /**
      * Creates a new airship
-     * @param world The world that this airship is being created in
+     *
+     * @param world        The world that this airship is being created in
      * @param initialBlock The block to start scanning this airship from (this is the block below the player)
-     * @param player The player who owns this airship
+     * @param player       The player who owns this airship
      * @throws IllegalAirshipException Thrown if the number of blocks in the airship exceeds the limit
      */
-    public Airship(World world, Block initialBlock, Player player) throws IllegalAirshipException {
+    public Airship(World world, Block initialBlock, String player) throws IllegalAirshipException {
 
         // Set the airship variables from the constructor parameters
         this.world = world;
@@ -63,23 +65,59 @@ public class Airship {
         blocks = new ArrayList<>();
 
         // Get the direction the player is facing
-        currentDirection = playerDirection(player);
+        currentDirection = playerDirection(Bukkit.getPlayer(player));
 
         // We need to scan the airship
         scanAirship(initialBlock);
     }
 
     /**
+     * Loads an airship from disk
+     * @param file The File of the airship to load
+     * @throws IOException Thrown if the Airship file is corrupt and can't be read
+     */
+    public Airship(File file) throws IOException {
+
+        // Create the collection to store the airship in
+        blocks = new ArrayList<>();
+
+        BufferedReader reader = new BufferedReader(new FileReader(file.getAbsoluteFile()));
+
+        this.owner = reader.readLine();
+
+        String world = reader.readLine();
+        this.world = Bukkit.getWorld(world);
+
+        String direction = reader.readLine();
+        this.currentDirection = BlockFace.valueOf(direction);
+
+        int airshipBlockCount = Integer.valueOf(reader.readLine());
+        for (int i = 0; i < airshipBlockCount; i ++) {
+            String[] blockData = reader.readLine().split(",");
+            int x = Integer.valueOf(blockData[0]);
+            int y = Integer.valueOf(blockData[1]);
+            int z = Integer.valueOf(blockData[2]);
+            Material m = Material.valueOf(blockData[3]);
+            int d = Integer.valueOf(blockData[4]);
+
+            AirshipBlock airshipBlock = new AirshipBlock(x, y, z, m, d);
+            blocks.add(airshipBlock);
+        }
+    }
+
+    /**
      * Works out the current direction the player is facing
+     *
      * @param player The player who's direction we want to know
      * @return The current direction the player is facing as a BlockFace
      */
     private BlockFace playerDirection(Player player) {
+
         // Get the Yaw of the player
         float absoluteYaw = player.getLocation().getYaw();
 
         // Adjust the yaw if it is outside the expected range
-        absoluteYaw = Math.abs(absoluteYaw) > 180.00 ? (((Math.abs(absoluteYaw)+180) % 360)-180)*(absoluteYaw/Math.abs(absoluteYaw)) : absoluteYaw;
+        absoluteYaw = Math.abs(absoluteYaw) > 180.00 ? (((Math.abs(absoluteYaw) + 180) % 360) - 180) * (absoluteYaw / Math.abs(absoluteYaw)) : absoluteYaw;
 
         // Return the direction the player is facing based on the Yaw
         if (Math.abs(absoluteYaw) >= 135) {
@@ -98,6 +136,7 @@ public class Airship {
      */
     @SuppressWarnings("unused")
     public void rescanAirship() {
+
         // Get the first block in the airship (index 0)
         AirshipBlock b = blocks.get(0);
 
@@ -117,6 +156,7 @@ public class Airship {
      * Recursive function to scan all of the blocks in the airship, takes the initial block and scans all neighbours
      * until it finds air in all neighbouring locations. Will only scan up to a pre-defined limit of blocks before
      * throwing and exception
+     *
      * @param block The initial block to begin this round of scanning from
      * @throws IllegalAirshipException Thrown if the number of blocks in the airship exceeds the pre-defined limit
      */
@@ -203,6 +243,7 @@ public class Airship {
 
     /**
      * Starts the airship moving, if it is already moving then we simply do nothing.
+     *
      * @param plugin The airship plugin that has called start on this airship
      */
     public void startAirship(AirshipPlugin plugin) {
@@ -211,7 +252,7 @@ public class Airship {
         if (!isMoving) {
 
             // Play the engine start sound to the player (TODO: Change when custom sounds are supported)
-            owner.playSound(owner.getLocation(), Sound.PORTAL, 1.0f, 1.0f);
+            Bukkit.getPlayer(owner).playSound(Bukkit.getPlayer(owner).getLocation(), Sound.PORTAL, 1.0f, 1.0f);
 
             // Create a repeating task to move the airship on a regular interval (currently 2.5 seconds)
             task = Bukkit.getScheduler().runTaskTimer(plugin, new AirshipMover(this), 0, 50);
@@ -239,6 +280,7 @@ public class Airship {
 
     /**
      * Rotates the airship in the specified direction
+     *
      * @param turnDirection The direction to rotate the airship (left or right)
      */
     @SuppressWarnings("deprecation")
@@ -273,7 +315,7 @@ public class Airship {
         int originZ = (maxZ + minZ) / 2;
 
         // Get the current location of the airships owner
-        Location playerLocation = owner.getLocation();
+        Location playerLocation =  Bukkit.getPlayer(owner).getLocation();
 
         // Get the location that is the block below the player
         playerLocation.setY(playerLocation.getY() - 1);
@@ -340,16 +382,17 @@ public class Airship {
         if (rotatePlayer) {
 
             // Teleport the player to the new location
-            rotatePlayer(turnDirection, originX, originZ, owner);
+            rotatePlayer(turnDirection, originX, originZ, Bukkit.getPlayer(owner));
         }
     }
 
     /**
      * Rotates the player about the origin location in the direction specified
+     *
      * @param turnDirection The direction to rotate the player in
-     * @param originX The center point X value
-     * @param originZ The center point Y value
-     * @param player The player we are going to rotate
+     * @param originX       The center point X value
+     * @param originZ       The center point Y value
+     * @param player        The player we are going to rotate
      */
     public void rotatePlayer(TurnDirection turnDirection, int originX, int originZ, Player player) {
 
@@ -377,5 +420,34 @@ public class Airship {
         // Teleport the player to the new location
         player.teleport(newLocation);
 
+    }
+
+    public void saveAirship(String fileName) throws IOException {
+
+        // Create a file for this airship
+        File file = new File("./airships/" + fileName);
+
+        // Check if the file exists, if not create a new one
+        if (!file.exists()) file.createNewFile();
+
+        // Get a BufferedWriter to save the airship
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file.getAbsoluteFile()));
+
+        writer.write(owner);
+        writer.newLine();
+        writer.write(world.getName());
+        writer.newLine();
+        writer.write(currentDirection.name());
+        writer.newLine();
+        writer.write(String.valueOf(blocks.size()));
+        writer.newLine();
+
+        for(AirshipBlock block : blocks){
+            writer.write(String.format("%d,%d,%d,%s,%d", block.x, block.y, block.z, block.t, block.d));
+            writer.newLine();
+        }
+
+        writer.flush();
+        writer.close();
     }
 }

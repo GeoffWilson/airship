@@ -13,8 +13,25 @@ import org.bukkit.block.BlockFace;
 public class AirshipBlock implements Comparable<AirshipBlock> {
 
     /**
+     * This is the quick constructor for loading the Airship from disk
+     * @param x The blocks X location in the world
+     * @param y The blocks Y location in the world
+     * @param z The blocks Z location in the world
+     * @param t The blocks Material type
+     * @param d The blocks data value (color etc..)
+     */
+    public AirshipBlock(int x, int y, int z, Material t, int d) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.t = t;
+        this.d = (byte) d;
+    }
+
+    /**
      * Set the correct new data value to rotate a block, this code is adapted from WorldEdit to use standard
      * Material types instead of WorldEdit ones.
+     *
      * @param type The type of block to rotate
      * @param data The current data value
      * @return The new data value for the block
@@ -291,6 +308,7 @@ public class AirshipBlock implements Comparable<AirshipBlock> {
     /**
      * Set the correct new data value to rotate a block, this code is adapted from WorldEdit to use standard
      * Material types instead of WorldEdit ones.
+     *
      * @param type The type of block to rotate
      * @param data The current data value
      * @return The new data value for the block
@@ -577,6 +595,7 @@ public class AirshipBlock implements Comparable<AirshipBlock> {
 
     /**
      * Create a new AirshipBlock based on the Block from the world
+     *
      * @param b The Block in the world to base this AirshipBlock on
      */
     @SuppressWarnings("deprecation")
@@ -597,6 +616,7 @@ public class AirshipBlock implements Comparable<AirshipBlock> {
     /**
      * Checks if this AirshipBlock is equal to another airship block (this only takes location into account
      * not material)
+     *
      * @param other The other AirshipBlock to compare this to
      * @return True if these blocks occupy the same location, False if not
      */
@@ -619,7 +639,8 @@ public class AirshipBlock implements Comparable<AirshipBlock> {
 
     /**
      * Shifts the block in the specified direction
-     * @param direction The direction to shift the block in
+     *
+     * @param direction   The direction to shift the block in
      * @param isReversing Indicates if the airship is reversing (the shift is opposite in this case)
      */
     public void shiftBlock(BlockFace direction, boolean isReversing) {
@@ -658,9 +679,10 @@ public class AirshipBlock implements Comparable<AirshipBlock> {
 
     /**
      * Rotates the block in the specified direction about the origin points supplied
+     *
      * @param turnDirection The direction we are trying to rotate the block in
-     * @param originX The x origin we are rotating about
-     * @param originZ The z origin we are rotating about
+     * @param originX       The x origin we are rotating about
+     * @param originZ       The z origin we are rotating about
      */
     public void rotateBlock(TurnDirection turnDirection, int originX, int originZ) {
 
@@ -692,6 +714,7 @@ public class AirshipBlock implements Comparable<AirshipBlock> {
     /**
      * Compares this AirshipBlock to another (not used anymore). This was used for sorting the array but is no
      * longer required.
+     *
      * @param o The other AirshipBlock we are comparing this one to
      * @return -1 if this block is less than the other, 0 if they are the same, and 1 if this block is greater
      */

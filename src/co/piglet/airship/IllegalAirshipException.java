@@ -6,10 +6,8 @@ package co.piglet.airship;
  *
  * @author Ben Carvell
  */
-public class IllegalAirshipException extends Throwable
-{
-    public IllegalAirshipException(String message)
-    {
+public class IllegalAirshipException extends Throwable {
+    public IllegalAirshipException(String message) {
         super(message);
     }
 }
