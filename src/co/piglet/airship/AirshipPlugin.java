@@ -54,6 +54,7 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
 
     /**
      * Gets the list of airships from the server, this is called by the Android plugin using reflection
+     *
      * @return An array containing the list of airships
      */
     @SuppressWarnings("unused")
@@ -64,10 +65,11 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
 
     /**
      * Called when a command is sent to the server by a client
+     *
      * @param sender The entity who sent the command (Console or Player)
-     * @param cmd The command sent by the sender
-     * @param label The alias that was used to issue the command (not used in this plugin)
-     * @param args The additional arguments sent with the command
+     * @param cmd    The command sent by the sender
+     * @param label  The alias that was used to issue the command (not used in this plugin)
+     * @param args   The additional arguments sent with the command
      * @return True if the command was executed, False if it was aborted
      */
     @Override
@@ -78,6 +80,27 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
 
             // We only handle airship commands
             case "airship":
+            case "as":
+
+                // Substitute shorthand commands
+
+                if (args[0].equals("f")) {
+                    args[0] = "forward";
+                } else if (args[0].equals("l")) {
+                    args[0] = "left";
+                } else if (args[0].equals("r")) {
+                    args[0] = "right";
+                } else if (args[0].equals("c")) {
+                    args[0] = "create";
+                } else if (args[0].equals("u")) {
+                    args[0] = "up";
+                } else if (args[0].equals("d")) {
+                    args[0] = "down";
+                } else if (args[0].equals("s")) {
+                    args[0] = "stop";
+                } else if (args[0].equals("ls")) {
+                    args[0] = "list";
+                }
 
                 // Check if this command was sent by a player
                 if (sender instanceof Player) {
@@ -110,6 +133,7 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                     // Get the action and airship name from the arguments
                     String action = args[0];
                     String airshipName = args[1];
+
 
                     // Check if the airship specified exists (or that this is a create command)
                     if (!airships.containsKey(airshipName) && !action.equals("create")) {
