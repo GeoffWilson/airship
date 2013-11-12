@@ -406,6 +406,9 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                                 // Inform the player that this airship has been created successfully
                                 player.sendMessage(String.format("Airship '%s' created!", airshipName));
 
+                                // Set the new airship as the player's active airship
+                                this.setMetadata(player.getName(), "activeAirship", airshipName);
+
                             } catch (IllegalAirshipException e) {
 
                                 // The scan of the airship failed, we need to inform the player
