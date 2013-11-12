@@ -1,5 +1,6 @@
 package co.piglet.airship;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
@@ -128,6 +129,11 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
+        // Create variables to store command arguments and the player
+        String action;
+        String airshipName;
+        Player player;
+
         // What was the command issued?
         switch (cmd.getName()) {
 
@@ -136,8 +142,20 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
             case "as":
 
 
-                // Substitute shorthand commands and catch calls with no commands
-                if (args.length != 0) {
+                // Check if this command was sent by a player
+                if (sender instanceof Player) {
+
+                    // Get the player
+                    player = (Player) sender;
+
+
+                    // Substitute shorthand commands and catch calls with incorrect number of commands
+
+                    if (args.length == 0 || args.length > 2) {
+                        player.sendMessage("Type /airship help for a list of commands.");
+                        return true;
+                    }
+
                     switch (args[0]) {
                         case "f":
                             args[0] = "forward";
@@ -164,36 +182,81 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                             args[0] = "list";
                             break;
                     }
-                }
+
+                    // Set action to hold the issued command
+                    action = args[0];
 
 
-                // Check if this command was sent by a player
-                if (sender instanceof Player) {
-
-                    // Get the player
-                    Player player = (Player) sender;
-
-                    String action;
-                    String airshipName;
-
-                    // Check for correct number of arguments and set action type and airship name
+                    // Check for single argument commands
                     if (args.length == 1) {
 
-                        action = args[0];
+                        // Check we have a valid command
 
-                        if (action.equals("list")) {
+                        switch (action) {
+                            case "list":
+                            case "forward":
+                            case "reverse":
+                            case "stop":
+                            case "up":
+                            case "down":
+                            case "left":
+                            case "right":
+                            case "help":
+                                break;
+                            default:
+                                player.sendMessage("Type /airship help for a list of commands.");
+                                break;
 
-                            // Loop through each airship in the collection
-                            for (String airship : airships.keySet()) {
-
-                                // Send the name of the airship to the player
-                                player.sendMessage(airship);
-                            }
-                            return true;
                         }
 
                         // Get metadata from the player object
                         airshipName = this.getMetadata(player.getName(), "activeAirship");
+
+                        if (action.equals("help")) {
+                            player.sendMessage("---------------");
+                            player.sendMessage(ChatColor.RED + "Airship Commands");
+                            player.sendMessage("---------------");
+                            player.sendMessage(ChatColor.GREEN + "list " + ChatColor.WHITE + "- Lists your current airships");
+                            player.sendMessage(ChatColor.GREEN + "create <name> " + ChatColor.WHITE + "- Creates an airship with the given name");
+                            player.sendMessage(ChatColor.GREEN + "delete <name> " + ChatColor.WHITE + "- Deletes the airship with the given name");
+                            player.sendMessage(ChatColor.GREEN +"activate <name> " + ChatColor.WHITE + "- Sets the given airship as your active airship");
+                            player.sendMessage(ChatColor.GREEN +"left " + ChatColor.WHITE + "- Turn your active airship left");
+                            player.sendMessage(ChatColor.GREEN +"right " + ChatColor.WHITE + "- Turn your active airship right");
+                            player.sendMessage(ChatColor.GREEN +"up " + ChatColor.WHITE + "- Move your active airship up");
+                            player.sendMessage(ChatColor.GREEN +"down " + ChatColor.WHITE + "- Move your active airship down");
+                            player.sendMessage(ChatColor.GREEN +"forward " + ChatColor.WHITE + "- Move your active airship forward");
+                            player.sendMessage(ChatColor.GREEN +"reverse " + ChatColor.WHITE + "- Move your active airship backwards");
+                            player.sendMessage(ChatColor.RED + "Type /airship manual for detailed instructions");
+                            return true;
+                        }
+
+                        if (action.equals("list")) {
+
+                            String border = player.getName();
+                            border = border.replaceAll(".", "-");
+
+                            // Loop through each airship in the collection and check ship owner
+                            player.sendMessage(border + "----------");
+                            player.sendMessage(player.getName() + "\'s Airships:");
+                            player.sendMessage(border + "----------");
+
+                            for (String airship : airships.keySet()) {
+
+                                Airship targetShip = airships.get(airship);
+
+                                if (player.getName().equals(targetShip.owner)) {
+
+                                    // Send the name of the airship to the player and highlight the player's active airship
+                                    if (airship.equals(airshipName)) {
+                                        player.sendMessage(ChatColor.RED + airship);
+                                    } else
+                                        player.sendMessage(airship);
+                                }
+
+                            }
+                            return true;
+                        }
+
 
                         // If the metadata is null or the array is 0 then error
                         if (airshipName == null) {
@@ -222,6 +285,7 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
 
                             // Stop the target airship
                             targetShip.stopAirship();
+                            return true;
                         }
 
                         // This handles the '/airship left' command
@@ -229,6 +293,7 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
 
                             // Turn the target airship left
                             targetShip.rotateAirship(TurnDirection.LEFT);
+                            return true;
                         }
 
                         // This handles the '/airship right' command
@@ -236,6 +301,7 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
 
                             // Turn the airship right
                             targetShip.rotateAirship(TurnDirection.RIGHT);
+                            return true;
                         }
 
                         // This handles the '/airship up' and '/airship down' command
@@ -254,6 +320,7 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
 
                             // Start the airship
                             targetShip.startAirship(this);
+                            return true;
                         }
 
                         // This handles the '/airship forward' and '/airship reverse' commands
@@ -269,11 +336,25 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
 
                             // Start the airship
                             targetShip.startAirship(this);
+                            return true;
                         }
-
+                        // Check for double argument commands
                     } else if (args.length == 2) {
 
-                        action = args[0];
+                        // Check we have a valid command
+
+                        switch (action) {
+                            case "create":
+                            case "activate":
+                            case "delete":
+                                break;
+                            default:
+                                player.sendMessage("Type /airship help for a list of commands.");
+                                break;
+
+                        }
+
+                        // Store the airship name from the input
                         airshipName = args[1];
 
                         // Check if the airship specified exists (or that this is a create command)
@@ -345,6 +426,7 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                             // Remove the airship from the collection
                             airships.remove(airshipName);
                             player.sendMessage(String.format("Airship '%s' deleted!", airshipName));
+                            return true;
 
                         }
 
@@ -366,14 +448,10 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                             } else {
                                 player.sendMessage("You do not own " + airshipName + "!");
                             }
-
+                            return true;
 
                         }
 
-                    } else {
-
-                        player.sendMessage("Type /airship help for a list of commands.");
-                        return true;
 
                     }
 
