@@ -17,16 +17,16 @@ public class AirshipMover implements Runnable {
      */
     public AirshipMover(Airship airship) {
 
-        this.airship = airship;
-    }
+            this.airship = airship;
+        }
 
-    /**
-     * run() function called by the Bukkit scheduler to move the airship
-     */
-    @Override
-    public void run() {
+        /**
+         * run() function called by the Bukkit scheduler to move the airship
+         */
+        @Override
+        public void run() {
 
-        // Move the airship in the airships current direction
-        airship.moveAirship();
-    }
+            // Move the airship in the airships current direction
+            airship.moveAirship();
+        }
 }

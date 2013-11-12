@@ -135,33 +135,37 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
             case "airship":
             case "as":
 
-                // Substitute shorthand commands
-                switch (args[0]) {
-                    case "f":
-                        args[0] = "forward";
-                        break;
-                    case "l":
-                        args[0] = "left";
-                        break;
-                    case "r":
-                        args[0] = "right";
-                        break;
-                    case "c":
-                        args[0] = "create";
-                        break;
-                    case "u":
-                        args[0] = "up";
-                        break;
-                    case "d":
-                        args[0] = "down";
-                        break;
-                    case "s":
-                        args[0] = "stop";
-                        break;
-                    case "ls":
-                        args[0] = "list";
-                        break;
+
+                // Substitute shorthand commands and catch calls with no commands
+                if (args.length != 0) {
+                    switch (args[0]) {
+                        case "f":
+                            args[0] = "forward";
+                            break;
+                        case "l":
+                            args[0] = "left";
+                            break;
+                        case "r":
+                            args[0] = "right";
+                            break;
+                        case "c":
+                            args[0] = "create";
+                            break;
+                        case "u":
+                            args[0] = "up";
+                            break;
+                        case "d":
+                            args[0] = "down";
+                            break;
+                        case "s":
+                            args[0] = "stop";
+                            break;
+                        case "ls":
+                            args[0] = "list";
+                            break;
+                    }
                 }
+
 
                 // Check if this command was sent by a player
                 if (sender instanceof Player) {
@@ -347,11 +351,23 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                         // This handles the '/airship activate' command
                         if (action.equals("activate")) {
 
-                            // Use redis to store persistent metadata
-                            this.setMetadata(player.getName(), "activeAirship", airshipName);
+                            // Get the target airship from then collection
+                            Airship targetShip = airships.get(airshipName);
 
-                            // Inform the user that their selected airship is active
-                            player.sendMessage(airshipName + " activated!");
+                            // Check player owns the selected airship
+
+                            if (player.getName().equals(targetShip.owner)) {
+                                // Use redis to store persistent metadata
+                                this.setMetadata(player.getName(), "activeAirship", airshipName);
+
+                                // Inform the user that their selected airship is active
+                                player.sendMessage(airshipName + " activated!");
+
+                            } else {
+                                player.sendMessage("You do not own " + airshipName + "!");
+                            }
+
+
                         }
 
                     } else {
