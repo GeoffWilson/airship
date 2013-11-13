@@ -183,6 +183,8 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                             break;
                         case "del":
                             args[0] = "delete";
+                        case "act":
+                            args[0] = "activate";
                     }
 
                     // Set action to hold the issued command
