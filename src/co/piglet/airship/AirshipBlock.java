@@ -626,11 +626,20 @@ public class AirshipBlock implements Comparable<AirshipBlock> {
         // Check if the object to compare is an AirshipBlock
         if (other instanceof AirshipBlock) {
 
-            // Cast the other object to and AirshipBlock
+
+
+            // Cast the other object to an AirshipBlock
             AirshipBlock otherBlock = (AirshipBlock) other;
 
             // Return true if the x,y and z values are equal between this block and the other block
             return otherBlock.x == x && otherBlock.y == y && otherBlock.z == z;
+
+        }   else if (other instanceof Block){
+
+            Block otherBlock = (Block) other;
+
+            return otherBlock.getLocation().getBlockX() == x && otherBlock.getLocation().getBlockY() == y && otherBlock.getLocation().getBlockZ() == z;
+
         }
 
         // Return false as this isn't an airship block we are comparing to

@@ -73,6 +73,7 @@ public class Airship {
 
     /**
      * Loads an airship from disk
+     *
      * @param file The File of the airship to load
      * @throws IOException Thrown if the Airship file is corrupt and can't be read
      */
@@ -92,7 +93,7 @@ public class Airship {
         this.currentDirection = BlockFace.valueOf(direction);
 
         int airshipBlockCount = Integer.valueOf(reader.readLine());
-        for (int i = 0; i < airshipBlockCount; i ++) {
+        for (int i = 0; i < airshipBlockCount; i++) {
             String[] blockData = reader.readLine().split(",");
             int x = Integer.valueOf(blockData[0]);
             int y = Integer.valueOf(blockData[1]);
@@ -315,7 +316,7 @@ public class Airship {
         int originZ = (maxZ + minZ) / 2;
 
         // Get the current location of the airships owner
-        Location playerLocation =  Bukkit.getPlayer(owner).getLocation();
+        Location playerLocation = Bukkit.getPlayer(owner).getLocation();
 
         // Get the location that is the block below the player
         playerLocation.setY(playerLocation.getY() - 1);
@@ -359,24 +360,50 @@ public class Airship {
         }
 
         // We need to update the direction of travel based on the existing direction
-        switch (currentDirection) {
-            case NORTH:
-                // North can become East or West
-                currentDirection = turnDirection == TurnDirection.LEFT ? BlockFace.WEST : BlockFace.EAST;
-                break;
-            case EAST:
-                // East can become North or South
-                currentDirection = turnDirection == TurnDirection.LEFT ? BlockFace.NORTH : BlockFace.SOUTH;
-                break;
-            case SOUTH:
-                // South can become East or West
-                currentDirection = turnDirection == TurnDirection.LEFT ? BlockFace.EAST : BlockFace.WEST;
-                break;
-            case WEST:
-                // West can become South or North
-                currentDirection = turnDirection == TurnDirection.LEFT ? BlockFace.SOUTH : BlockFace.NORTH;
-                break;
+
+
+        if (currentDirection == BlockFace.UP || currentDirection == BlockFace.DOWN) {
+            switch (lastDirection) {
+
+                case NORTH:
+                    // North can become East or West
+                    lastDirection = turnDirection == TurnDirection.LEFT ? BlockFace.WEST : BlockFace.EAST;
+                    break;
+                case EAST:
+                    // East can become North or South
+                    lastDirection = turnDirection == TurnDirection.LEFT ? BlockFace.NORTH : BlockFace.SOUTH;
+                    break;
+                case SOUTH:
+                    // South can become East or West
+                    lastDirection = turnDirection == TurnDirection.LEFT ? BlockFace.EAST : BlockFace.WEST;
+                    break;
+                case WEST:
+                    // West can become South or North
+                    lastDirection = turnDirection == TurnDirection.LEFT ? BlockFace.SOUTH : BlockFace.NORTH;
+                    break;
+            }
+        } else {
+            switch (currentDirection) {
+
+                case NORTH:
+                    // North can become East or West
+                    currentDirection = turnDirection == TurnDirection.LEFT ? BlockFace.WEST : BlockFace.EAST;
+                    break;
+                case EAST:
+                    // East can become North or South
+                    currentDirection = turnDirection == TurnDirection.LEFT ? BlockFace.NORTH : BlockFace.SOUTH;
+                    break;
+                case SOUTH:
+                    // South can become East or West
+                    currentDirection = turnDirection == TurnDirection.LEFT ? BlockFace.EAST : BlockFace.WEST;
+                    break;
+                case WEST:
+                    // West can become South or North
+                    currentDirection = turnDirection == TurnDirection.LEFT ? BlockFace.SOUTH : BlockFace.NORTH;
+                    break;
+            }
         }
+
 
         // If we have decided we need to move the owner then do it here
         if (rotatePlayer) {
@@ -442,12 +469,21 @@ public class Airship {
         writer.write(String.valueOf(blocks.size()));
         writer.newLine();
 
-        for(AirshipBlock block : blocks){
+        for (AirshipBlock block : blocks) {
             writer.write(String.format("%d,%d,%d,%s,%d", block.x, block.y, block.z, block.t, block.d));
             writer.newLine();
         }
 
         writer.flush();
         writer.close();
+    }
+
+    public boolean containsBlock(Block block) {
+        for (AirshipBlock airshipBlock : blocks) {
+            if (airshipBlock.equals(block)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

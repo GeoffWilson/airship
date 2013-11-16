@@ -3,6 +3,7 @@ package co.piglet.airship;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -206,6 +207,7 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                             case "left":
                             case "right":
                             case "help":
+                            case "activate":
                                 break;
                             default:
                                 player.sendMessage("Type /airship help for a list of commands.");
@@ -223,13 +225,13 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                             player.sendMessage(ChatColor.GREEN + "list " + ChatColor.WHITE + "- Lists your current airships");
                             player.sendMessage(ChatColor.GREEN + "create <name> " + ChatColor.WHITE + "- Creates an airship with the given name");
                             player.sendMessage(ChatColor.GREEN + "delete <name> " + ChatColor.WHITE + "- Deletes the airship with the given name");
-                            player.sendMessage(ChatColor.GREEN +"activate <name> " + ChatColor.WHITE + "- Sets the given airship as your active airship");
-                            player.sendMessage(ChatColor.GREEN +"left " + ChatColor.WHITE + "- Turn your active airship left");
-                            player.sendMessage(ChatColor.GREEN +"right " + ChatColor.WHITE + "- Turn your active airship right");
-                            player.sendMessage(ChatColor.GREEN +"up " + ChatColor.WHITE + "- Move your active airship up");
-                            player.sendMessage(ChatColor.GREEN +"down " + ChatColor.WHITE + "- Move your active airship down");
-                            player.sendMessage(ChatColor.GREEN +"forward " + ChatColor.WHITE + "- Move your active airship forward");
-                            player.sendMessage(ChatColor.GREEN +"reverse " + ChatColor.WHITE + "- Move your active airship backwards");
+                            player.sendMessage(ChatColor.GREEN + "activate <name> " + ChatColor.WHITE + "- Sets the given airship as your active airship");
+                            player.sendMessage(ChatColor.GREEN + "left " + ChatColor.WHITE + "- Turn your active airship left");
+                            player.sendMessage(ChatColor.GREEN + "right " + ChatColor.WHITE + "- Turn your active airship right");
+                            player.sendMessage(ChatColor.GREEN + "up " + ChatColor.WHITE + "- Move your active airship up");
+                            player.sendMessage(ChatColor.GREEN + "down " + ChatColor.WHITE + "- Move your active airship down");
+                            player.sendMessage(ChatColor.GREEN + "forward " + ChatColor.WHITE + "- Move your active airship forward");
+                            player.sendMessage(ChatColor.GREEN + "reverse " + ChatColor.WHITE + "- Move your active airship backwards");
                             player.sendMessage(ChatColor.RED + "Type /airship manual for detailed instructions");
                             return true;
                         }
@@ -259,6 +261,41 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
 
                             }
                             return true;
+                        }
+
+                        // This handles the '/airship activate' command
+                        if (action.equals("activate")) {
+
+                            // Get the world the player is in
+                            World world = player.getWorld();
+
+                            // Get the block at the player position
+                            Block testBlock = world.getBlockAt(player.getLocation());
+
+                            for (String airshipKey : airships.keySet()) {
+
+                                Airship airship = airships.get(airshipKey);
+
+                                if (airship.containsBlock(testBlock)) {
+                                    if (player.getName().equals(airship.owner)) {
+                                        // Use redis to store persistent metadata
+                                        this.setMetadata(player.getName(), "activeAirship", airshipKey);
+
+                                        // Inform the user that their selected airship is active
+                                        player.sendMessage(airshipKey + " activated!");
+
+                                    } else {
+                                        player.sendMessage("You do not own " + airshipKey + "!");
+                                    }
+                                    return true;
+
+                                }
+
+                            }
+
+                            player.sendMessage("No airship detected!");
+                            return true;
+
                         }
 
 
@@ -349,7 +386,6 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
 
                         switch (action) {
                             case "create":
-                            case "activate":
                             case "delete":
                                 break;
                             default:
@@ -433,28 +469,6 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                             // Remove the airship from the collection
                             airships.remove(airshipName);
                             player.sendMessage(String.format("Airship '%s' deleted!", airshipName));
-                            return true;
-
-                        }
-
-                        // This handles the '/airship activate' command
-                        if (action.equals("activate")) {
-
-                            // Get the target airship from then collection
-                            Airship targetShip = airships.get(airshipName);
-
-                            // Check player owns the selected airship
-
-                            if (player.getName().equals(targetShip.owner)) {
-                                // Use redis to store persistent metadata
-                                this.setMetadata(player.getName(), "activeAirship", airshipName);
-
-                                // Inform the user that their selected airship is active
-                                player.sendMessage(airshipName + " activated!");
-
-                            } else {
-                                player.sendMessage("You do not own " + airshipName + "!");
-                            }
                             return true;
 
                         }
