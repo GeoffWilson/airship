@@ -189,6 +189,8 @@ public class Airship {
             // Create the airship block for this neighbour
             AirshipBlock b = new AirshipBlock(neighbours[i]);
 
+
+
             // If this block is already in the airship we can ignore it
             if (!blocks.contains(b)) {
 

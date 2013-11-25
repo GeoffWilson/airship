@@ -186,6 +186,8 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                             args[0] = "delete";
                         case "act":
                             args[0] = "activate";
+                        case "tp":
+                            args[0] = "teleport";
                     }
 
                     // Set action to hold the issued command
@@ -208,6 +210,7 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                             case "right":
                             case "help":
                             case "activate":
+                            case "teleport":
                                 break;
                             default:
                                 player.sendMessage("Type /airship help for a list of commands.");
@@ -460,16 +463,22 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                         // This handles the '/airship delete' command
                         if (action.equals("delete")) {
 
-                            // Get the target airship from then collection
+                            // Get the target airship from the collection
                             Airship targetShip = airships.get(airshipName);
+                            if (player.getName().equals(targetShip.owner)) {
 
-                            // Stop the airship
-                            targetShip.stopAirship();
+                                // Stop the airship
+                                targetShip.stopAirship();
 
-                            // Remove the airship from the collection
-                            airships.remove(airshipName);
-                            player.sendMessage(String.format("Airship '%s' deleted!", airshipName));
-                            return true;
+                                // Remove the airship from the collection
+                                airships.remove(airshipName);
+                                player.sendMessage(String.format("Airship '%s' deleted!", airshipName));
+                                return true;
+                            } else {
+                                player.sendMessage(String.format("Airship '%s' does not belong to you!", airshipName));
+                                return true;
+                            }
+
 
                         }
 
