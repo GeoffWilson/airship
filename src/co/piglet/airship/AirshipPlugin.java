@@ -436,6 +436,25 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                             // Get the world the player is in
                             World world = player.getWorld();
 
+
+                            // Get the block at the player position
+                            Block testBlock = world.getBlockAt(initialLocation);
+
+
+                            for (String airshipKey : airships.keySet()) {
+
+                                Airship airship = airships.get(airshipKey);
+
+
+                                if (airship.containsBlock(testBlock)) {
+                                    player.sendMessage("An airship already exists at this location.");
+                                    return true;
+
+                                }
+
+                            }
+
+
                             try {
                                 // Create a new Airship object for the world, player and specified initial block
                                 Airship newAirship = new Airship(world, world.getBlockAt(initialLocation), player.getName());
