@@ -161,6 +161,9 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
                         case "f":
                             args[0] = "forward";
                             break;
+                        case "rev":
+                            args[0] = "reverse";
+                            break;
                         case "l":
                             args[0] = "left";
                             break;
