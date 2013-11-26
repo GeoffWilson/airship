@@ -443,10 +443,7 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
 
                             for (String airshipKey : airships.keySet()) {
 
-                                Airship airship = airships.get(airshipKey);
-
-
-                                if (airship.containsBlock(testBlock)) {
+                                if (airships.get(airshipKey).containsBlock(testBlock)) {
                                     player.sendMessage("An airship already exists at this location.");
                                     return true;
 
