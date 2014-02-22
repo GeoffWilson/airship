@@ -1,6 +1,8 @@
 package co.piglet.airship;
 
 import org.bukkit.*;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -11,6 +13,7 @@ import org.bukkit.scheduler.BukkitTask;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+
 
 /**
  * Represents an airship on the server
@@ -235,6 +238,8 @@ public class Airship {
             if (newBlock.getType() == block.t && newBlock.getData() == block.d) {
                 continue;
             }
+
+
 
             // Set the type of the new location
             newBlock.setType(block.t);

@@ -39,7 +39,6 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
     /**
      * Called when then plugin is enabled by CraftBukkit. This is where we should
      * instance all of our class variables and do any setup
-     * TODO: This should load the airships from disk/database
      */
     @Override
     public void onEnable() {
@@ -90,7 +89,6 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
 
     /**
      * Called when the plugin is disabled by CraftBukkit (on shutdown normally)
-     * TODO: This should save the airships to disk/database
      */
     @Override
     public void onDisable() {
@@ -544,6 +542,7 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
      * @return A String value representing the key value, or null if the key is not set for the player
      */
     private String getMetadata(String playerName, String key) {
+
         // Get a connection to the Redis server
         Jedis redis = redisPool.getResource();
 
@@ -577,6 +576,7 @@ public class AirshipPlugin extends JavaPlugin implements Listener {
      * @return True if the data was successfully set on the server, false if not.
      */
     private boolean setMetadata(String playerName, String key, String value) {
+
         // Get a connection to the Redis server
         Jedis redis = redisPool.getResource();
 
