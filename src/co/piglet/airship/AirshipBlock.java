@@ -12,12 +12,7 @@ import org.bukkit.block.BlockFace;
  */
 public class AirshipBlock implements Comparable<AirshipBlock> {
 
-    public static void hello()
-    {
-        System.out.println("hello");
-        }
-
-    /**
+   /**
      * This is the quick constructor for loading the Airship from disk
      * @param x The blocks X location in the world
      * @param y The blocks Y location in the world
